@@ -1,0 +1,20 @@
+#!/bin/bash
+
+vpnserver start
+
+vpn_hub_cmd DEFAULT HubCreate ${VPN_HUB_NAME} /PASSWORD:${VPN_HUB_PASSWORD}
+vpn_hub_cmd ${VPN_HUB_NAME} UserCreate ${VPN_USER_NAME} /GROUP:none /REALNAME:none /NOTE:none
+vpn_hub_cmd ${VPN_HUB_NAME} UserPasswordSet ${VPN_USER_NAME} /PASSWORD:${VPN_USER_PASSWORD}
+vpn_hub_cmd ${VPN_HUB_NAME} IPsecEnable /L2TP:yes /L2TPRAW:no /ETHERIP:no /PSK:${VPN_COMMON_SECRET} /DEFAULTHUB:${VPN_HUB_NAME}
+vpn_hub_cmd ${VPN_HUB_NAME} SecureNatEnable
+vpn_hub_cmd ${VPN_HUB_NAME} NatEnable
+vpn_hub_cmd ${VPN_HUB_NAME} DHCPEnable
+if [[ -n "${VPN_HOST_NAME}" ]]; then
+    vpn_hub_cmd ${VPN_HUB_NAME} DynamicDnsSetHostname ${VPN_HOST_NAME}
+    sleep 3
+fi
+vpn_hub_cmd ${VPN_HUB_NAME} VpnAzureSetEnable yes
+vpn_hub_cmd ${VPN_HUB_NAME} DynamicDnsGetStatus
+vpn_hub_cmd ${VPN_HUB_NAME} VpnAzureGetStatus
+
+vpnserver stop

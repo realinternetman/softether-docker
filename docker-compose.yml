@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+  vpn:
+    env_file:
+      - ./.env
+    container_name: softether-vpn
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - DOWNLOAD_DIR=${DOWNLOAD_DIR:-/tmp/vpnserver}
+        - GITHUB_URL=${GITHUB_URL:-https://github.com/SoftEtherVPN}
+        - REPSITORY_NAME=${REPSITORY_NAME:-SoftEtherVPN_Stable}
+    environment:
+      - VPN_HUB_NAME=${VPN_HUB_NAME:-testhub}
+      - VPN_HUB_PASSWORD=${VPN_HUB_PASSWORD:-testhub}
+      - VPN_USER_NAME=${VPN_USER_NAME:-testuser}
+      - VPN_USER_PASSWORD=${VPN_USER_PASSWORD:-testuser}
+      - VPN_COMMON_SECRET=${VPN_COMMON_SECRET:-testsecret}
+      - VPN_HOST_NAME=${VPN_HOST_NAME}
+    volumes:
+        - vpn_data:/usr/vpnserver/
+        - ./data/log/packet_log/:/usr/vpnserver/packet_log/
+        - ./data/log/server_log/:/usr/vpnserver/server_log/
+        - ./data/log/security_log/:/usr/vpnserver/security_log/
+        - type: bind
+          source: ./data/vpn_server.config
+          target: /usr/vpnserver/vpn_server.config
+    ports:
+      - '500:500/udp'
+      - '4500:4500/udp'
+    tty: true
+    privileged: true
+    restart: unless-stopped
+volumes: 
+  vpn_data:
